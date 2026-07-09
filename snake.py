@@ -16,10 +16,10 @@ bgimg = pygame.transform.scale(bgimg,(screen_width,screen_height)).convert_alpha
 welimg = pygame.image.load("welcome.png")
 welimg = pygame.transform.scale(welimg,(screen_width,screen_height)).convert_alpha()
 
-head_img = pygame.image.load("banana.png") # Put your actual image filename here!
+head_img = pygame.image.load("banana.png")
 head_img = pygame.transform.scale(head_img, (25, 25)).convert_alpha()
 
-over_img = pygame.image.load("game_over.png") # Put your actual image filename here!
+over_img = pygame.image.load("game_over.png")
 over_img = pygame.transform.scale(over_img, (screen_width, screen_height)).convert_alpha()
 
 pygame.display.set_caption("CHOTA COCKROACH")
@@ -42,54 +42,41 @@ def plot_snake(gameWindow,color,snk_list,snake_size):
 
 
 def draw_graphic_banana(surface, x, y):
-    # Target size is 25x25 pixels on your screen
     target_size = 25
     resolution = 128
-    pixel_size = target_size / resolution  # Scale factor for each matrix unit
+    pixel_size = target_size / resolution
 
-    angle = -0.78  # 45 degrees in radians
+    angle = -0.78
     cos_a = math.cos(angle)
     sin_a = math.sin(angle)
 
-    # 3D Color Palette Gradients
     HIGHLIGHT = (255, 250, 140)
 
-    # 3D Color Palette Gradients (From bright highlights to deep ambient shadow)
-    HIGHLIGHT = (255, 250, 140)  # Top light reflection
-    BODY_LIGHT = (255, 235, 40)  # Rich banana yellow
-    BODY_SHADE = (220, 180, 5)  # Mid-tone shading
-    DARK_SHADOW = (145, 105, 10)  # Underbelly shadow
-    STEM_GREEN = (155, 185, 45)  # Ripening green transition
-    STEM_BROWN = (100, 70, 35)  # Woody stem stalk
-    TIP_BROWN = (45, 30, 15)  # Bottom blossom cap
+    HIGHLIGHT = (255, 250, 140)
+    BODY_LIGHT = (255, 235, 40)
+    BODY_SHADE = (220, 180, 5)
+    DARK_SHADOW = (145, 105, 10)
+    STEM_GREEN = (155, 185, 45)
+    STEM_BROWN = (100, 70, 35)
+    TIP_BROWN = (45, 30, 15)
 
     for row in range(resolution):
         for col in range(resolution):
-            # Normalize coordinates to a -1.0 to 1.0 grid for vector math
             raw_nx = (col / resolution) * 2.0 - 1.0
             raw_ny = (row / resolution) * 2.0 - 1.0
             nx = raw_nx * cos_a - raw_ny * sin_a
             ny = raw_nx * sin_a + raw_ny * cos_a
 
-            # 1. Math Formula for the Perfect Banana Arc (Crescent shape)
-            # We bend the X-axis across a parabolic curve to simulate natural curvature
             arc_bend = 0.55 * (ny ** 2) - 0.25
             adjusted_nx = nx + arc_bend
 
-            # 2. Organic Thickness Tapering
-            # A real banana bulges in the center (ny=0) and tapers cleanly at the tips (ny = -0.85 and +0.85)
             thickness = 0.35 * math.cos(ny * 1.5)
 
-            # Calculate distance from the center core of the banana body
             dist_from_core = abs(adjusted_nx)
 
-            # Check if this matrix coordinate falls inside the boundaries of the fruit
             if dist_from_core < thickness and -0.85 < ny < 0.85:
-                # --- Advanced 3D Lighting & Shading Vectors ---
-                # Determine where the pixel sits horizontally on the round body (-1.0 to 1.0 width)
                 shading_vector = adjusted_nx / thickness
 
-                # Assign precise color based on light source coming from top-left
                 if shading_vector < -0.6:
                     color = HIGHLIGHT
                 elif shading_vector < 0.0:
@@ -99,61 +86,44 @@ def draw_graphic_banana(surface, x, y):
                 else:
                     color = DARK_SHADOW
 
-                # Apply green ripening tint near the very top of the body
                 if ny < -0.65:
-                    # Blend towards green near the stem hook
                     color = tuple(int(color[i] * 0.5 + STEM_GREEN[i] * 0.5) for i in range(3))
 
-                # Plot the calculated body pixel
                 px = x + int(col * pixel_size)
                 py = y + int(row * pixel_size)
                 pygame.draw.rect(surface, color, [px, py, 2, 2])
 
-            # 3. Render Top Wood Stem (-0.95 to -0.85 range)
             elif dist_from_core < 0.08 and -0.95 <= ny <= -0.85:
                 px = x + int(col * pixel_size)
                 py = y + int(row * pixel_size)
                 pygame.draw.rect(surface, STEM_BROWN, [px, py, 2, 2])
 
-            # 4. Render Bottom Blossom Cap (+0.85 to +0.90 range)
             elif dist_from_core < 0.06 and 0.85 <= ny <= 0.90:
                 px = x + int(col * pixel_size)
                 py = y + int(row * pixel_size)
                 pygame.draw.rect(surface, TIP_BROWN, [px, py, 2, 2])
 
 def draw_graphic_cockroach(surface, x, y, size=25):
-    # Color palette
-    body_brown = (139, 69, 19)     # Shiny brown shell
-    dark_brown = (80, 35, 10)      # Segment shadow lines
-    antenna_color = (60, 30, 5)    # Antennas and legs
+    body_brown = (139, 69, 19)
+    dark_brown = (80, 35, 10)
+    antenna_color = (60, 30, 5)
 
-    # Center coordinates of the 25x25 block
     cx = x + size // 2
     cy = y + size // 2
 
-    # 1. DRAW THE LEGS (6 small diagonal lines protruding from the body)
-    for side in [-1, 1]: # Left side (-1) and Right side (1)
+    for side in [-1, 1]:
         for offset_y in [-4, 0, 4]:
             pygame.draw.line(surface, antenna_color, (cx, cy + offset_y), (cx + (side * 11), cy + offset_y - 2), 2)
 
-    # 2. DRAW THE MAIN OVAL BODY (The segmented shell)
     pygame.draw.ellipse(surface, body_brown, [x + 4, y + 4, 17, 18])
 
-    # 3. DRAW SHELL SEGMENT LINES (Gives it that distinct roach texture)
     for line_y in [y + 8, y + 12, y + 16]:
         pygame.draw.line(surface, dark_brown, (x + 6, line_y), (x + 19, line_y), 1)
 
-    # 4. DRAW THE HEAD (A smaller darker circle at the front)
     pygame.draw.circle(surface, dark_brown, (cx, y + 5), 4)
 
-    # 5. DRAW ANTENNAE (Two long swept-forward lines radiating from the head)
-    pygame.draw.line(surface, antenna_color, (cx - 2, y + 5), (x - 2, y - 4), 1) # Left antenna
-    pygame.draw.line(surface, antenna_color, (cx + 2, y + 5), (x + size + 2, y - 4), 1) # Right antenna
-
-
-
-
-
+    pygame.draw.line(surface, antenna_color, (cx - 2, y + 5), (x - 2, y - 4), 1)
+    pygame.draw.line(surface, antenna_color, (cx + 2, y + 5), (x + size + 2, y - 4), 1)
 
 
 def welcome():
@@ -270,20 +240,18 @@ def gameloop():
             if len(snk_list)>snk_length:
                 del snk_list[0]
             if head in snk_list[:-1]:
-                pygame.mixer.music.stop()  # Stop background loop
-                crash_sound.play()  # Play your short crash sound effect
+                pygame.mixer.music.stop()
+                crash_sound.play()
                 game_over = True
             if snake_x<0 or snake_x>screen_width or snake_y<0 or snake_y>screen_height:
                 game_over = True
-                pygame.mixer.music.stop()  # Stop background loop
+                pygame.mixer.music.stop()
                 crash_sound.play()
 
             for i, segment in enumerate(snk_list):
-                # The last item in snk_list is always the front head of the snake
                 if i == len(snk_list) - 1:
                     gameWindow.blit(head_img, (segment[0], segment[1]))
                 else:
-                    # The remaining segments stay as cockroaches
                     draw_graphic_cockroach(gameWindow, segment[0], segment[1], snake_size)
         pygame.display.update()
         clock.tick(fps)
